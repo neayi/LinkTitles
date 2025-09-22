@@ -76,7 +76,8 @@
                 ]
         },
         "ExtensionMessagesFiles": {
-                "LinkTitlesMagic": "includes/Magic.php"
+                "LinkTitlesMagic": "includes/Magic.php",
+                "LinkTitlesAliases": "includes/Magic.php"
         },
         "MessagesDirs": {
                 "LinkTitles": [
