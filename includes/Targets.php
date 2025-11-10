@@ -118,7 +118,8 @@ class Targets {
 	private function fetch($targetPageTitle = '') {
 		( $this->config->preferShortTitles ) ? $sortOrder = 'ASC' : $sortOrder = 'DESC';
 
-		$dbr = wfGetDB( DB_REPLICA );
+	// Use getConnection() (getConnectionRef is deprecated in MW 1.39+)
+	$dbr = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$whereClauses = [
 			"page_content_model = 'wikitext'"			

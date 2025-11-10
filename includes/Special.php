@@ -103,8 +103,8 @@ class Special extends \SpecialPage {
 		// Start the stopwatch
 		$startTime = microtime( true );
 
-		// Connect to the database
-		$dbr = wfGetDB( DB_REPLICA );
+		// Connect to the database (getConnectionRef is deprecated in MW 1.39+)
+		$dbr = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		// Fetch the start index and max number of records from the POST
 		// request.

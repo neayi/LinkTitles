@@ -41,7 +41,8 @@ class TargetsTest extends LinkTitles\TestCase {
 
 		// Count number of articles: Inspired by updateArticleCount.php maintenance
 		// script: https://doc.wikimedia.org/mediawiki-core/master/php/updateArticleCount_8php_source.html
-		$dbr = wfGetDB( DB_REPLICA );
+		// Use getConnection() instead of deprecated getConnectionRef()
+		$dbr = \MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 		$counter = new SiteStatsInit( $dbr );
 		$count = $counter->pages();
 
