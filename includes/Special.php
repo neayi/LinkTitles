@@ -75,17 +75,39 @@ class Special extends \SpecialPage {
 		// If GET, display information and a button to start linking.
 		// If POST, start or continue the linking process.
 		if ( $request->wasPosted() ) {
-			if ( array_key_exists( 's', $request->getValues() ) ) {
+			$values = $request->getValues();
+			if ( array_key_exists( 'page_name', $values ) && !empty( $values['page_name'] ) ) {
+				$this->processSinglePage( $values['page_name'], $output );
+				$this->buildInfoPage( $request, $output );
+			} elseif ( array_key_exists( 's', $values ) ) {
 				$this->process( $request, $output );
-			}
-			else
-			{
+			} else {
 				$this->buildInfoPage( $request, $output );
 			}
 		}
 		else
 		{
 			$this->buildInfoPage( $request, $output );
+		}
+	}
+
+	/**
+	 * Processes a single page.
+	 * @param string $pageName Name of the page to process.
+	 * @param OutputPage $output Output page object.
+	 */
+	private function processSinglePage( $pageName, &$output ) {
+		$title = \Title::newFromText( $pageName );
+		if ( !$title || !$title->exists() ) {
+			$output->addWikiMsg( 'linktitles-special-page-not-found', $pageName );
+			return;
+		}
+
+		$success = Extension::processPage( $title, $this->getContext() );
+		if ( $success ) {
+			$output->addWikiMsg( 'linktitles-special-single-page-success', $title->getPrefixedText() );
+		} else {
+			$output->addWikiMsg( 'linktitles-special-single-page-failure', $title->getPrefixedText() );
 		}
 	}
 
@@ -125,6 +147,7 @@ class Special extends \SpecialPage {
 		};
 
 		array_key_exists( 'r', $postValues ) ? $reloads = $postValues['r'] : $reloads = 0;
+		$targetPage = isset( $postValues['target_page'] ) ? $postValues['target_page'] : '';
 
 		// Retrieve page names from the database.
 		$res = $dbr->select(
@@ -143,7 +166,7 @@ class Special extends \SpecialPage {
 		// Iterate through the pages; break if a time limit is exceeded.
 		foreach ( $res as $row ) {
 			$curTitle = \Title::makeTitleSafe( $row->page_namespace, $row->page_title);
-			Extension::processPage( $curTitle, $this->getContext() );
+			Extension::processPage( $curTitle, $this->getContext(), false, $targetPage );
 			$start += 1;
 
 			// Check if the time limit is exceeded
@@ -163,7 +186,7 @@ class Special extends \SpecialPage {
 			// Build a form with hidden values and output JavaScript code that
 			// immediately submits the form in order to continue the process.
 			$output->addHTML( $this->getReloaderForm( $request->getRequestURL(),
-				$start, $end, $reloads) );
+				$start, $end, $reloads, $targetPage) );
 		}
 		else // Last page has been processed
 		{
@@ -179,11 +202,43 @@ class Special extends \SpecialPage {
 		$output->addWikiMsg( 'linktitles-special-info', Extension::URL );
 		$url = $request->getRequestURL();
 		$submitButtonLabel = $this->msg( 'linktitles-special-submit' );
+		
+		// Form 1: Process all pages
+		$output->addHTML( '<h2>' . $this->msg( 'linktitles-special-batch-all' )->escaped() . '</h2>' );
 		$output->addHTML(
 <<<EOF
 <form method="post" action="{$url}">
 	<input type="submit" value="$submitButtonLabel" />
 	<input type="hidden" name="s" value="0" />
+</form>
+EOF
+		);
+
+		// Form 2: Process single page
+		$singlePageLabel = $this->msg( 'linktitles-special-single-page-label' )->escaped();
+		$singlePageButton = $this->msg( 'linktitles-special-single-page-submit' )->escaped();
+		$output->addHTML( '<h2>' . $this->msg( 'linktitles-special-single-page-header' )->escaped() . '</h2>' );
+		$output->addHTML(
+<<<EOF
+<form method="post" action="{$url}">
+	<label for="page_name">$singlePageLabel</label>
+	<input type="text" name="page_name" id="page_name" />
+	<input type="submit" value="$singlePageButton" />
+</form>
+EOF
+		);
+
+		// Form 3: Link specific target page
+		$targetPageLabel = $this->msg( 'linktitles-special-target-page-label' )->escaped();
+		$targetPageButton = $this->msg( 'linktitles-special-target-page-submit' )->escaped();
+		$output->addHTML( '<h2>' . $this->msg( 'linktitles-special-target-page-header' )->escaped() . '</h2>' );
+		$output->addHTML(
+<<<EOF
+<form method="post" action="{$url}">
+	<label for="target_page">$targetPageLabel</label>
+	<input type="text" name="target_page" id="target_page" />
+	<input type="hidden" name="s" value="0" />
+	<input type="submit" value="$targetPageButton" />
 </form>
 EOF
 		);
@@ -221,15 +276,21 @@ EOF
 	 * @param $start   Index of the next page that shall be processed.
 	 * @param $end     Index of the last page to be processed.
 	 * @param $reloads Counter that holds the number of reloads so far.
+	 * @param $targetPage Optional target page to link to.
 	 * @return         String that holds the HTML for a form and a JavaScript command.
 	 */
-	private function getReloaderForm( $url, $start, $end, $reloads ) {
+	private function getReloaderForm( $url, $start, $end, $reloads, $targetPage = '' ) {
+		$targetInput = '';
+		if ( !empty( $targetPage ) ) {
+			$targetInput = '<input type="hidden" name="target_page" value="' . htmlspecialchars( $targetPage ) . '" />';
+		}
 		return
 <<<EOF
 <form method="post" name="linktitles" action="{$url}">
 	<input type="hidden" name="s" value="{$start}" />
 	<input type="hidden" name="e" value="{$end}" />
 	<input type="hidden" name="r" value="{$reloads}" />
+	{$targetInput}
 </form>
 <script type="text/javascript">
 	document.linktitles.submit();
@@ -256,7 +317,7 @@ EOF
 		}
 
 		$output->addWikiMsg( 'linktitles-special-completed-info', $end,
-			$config->specialPageReloadAfter, $reloads, $pagesPerReload
+			$this->config->specialPageReloadAfter, $reloads, $pagesPerReload
 		);
 	}
 
