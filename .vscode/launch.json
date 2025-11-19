@@ -15,6 +15,17 @@
                 "/var/www/html/extensions/LinkTitles": "${workspaceFolder}",
                 "/var/www/html": "${workspaceFolder}/../.."
             }
+        },
+        {
+            "name": "Launch currently open script",
+            "type": "php",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "port": 9003,
+            "pathMappings": {
+                "/var/www/html/extensions/LinkTitles": "${workspaceFolder}"
+            }
         }
     ]
 }

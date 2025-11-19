@@ -1,0 +1,23 @@
+{
+    "linktitles": "LinkTitles",
+    "linktitles-desc": "Ajoute automatiquement des liens vers des pages existantes lorsqu'une page est enregistrée.",
+    "linktitles-special-info": "Extension LinkTitles : $1\n== Création de liens par lot ==\nVous pouvez démarrer un processus de création de liens par lot en cliquant sur le bouton ci-dessous. Cela parcourra chaque page de l'espace de noms principal de votre Wiki et insérera des liens automatiquement. Cette page se rechargera automatiquement pour éviter de bloquer le serveur. Pour interrompre le processus, fermez simplement cette page.",
+    "linktitles-special-submit": "Commencer la création de liens maintenant",
+    "linktitles-special-progress": "== Traitement des pages... ==\nL'extension [$1 LinkTitles] parcourt actuellement chaque page de votre wiki, ajoutant des liens vers des pages existantes le cas échéant.\n=== Page actuelle : $2 ===",
+    "linktitles-special-page-count": "Page $1 sur $2.\n",
+    "linktitles-special-cancel-notice": "=== Pour annuler, fermez cette page ou cliquez sur le bouton 'Arrêter' de votre navigateur ===\n[[Special:LinkTitles|Retour à Special:LinkTitles.]]",
+    "linktitles-special-completed-info": "== Traitement par lot terminé ! ==\n{| class=\"wikitable\"\n|-\n| nombre total de pages : || $1\n|-\n| paramètre de délai d'attente [s] : || $2\n|-\n| rechargements de page : || $3\n|-\n| pages scannées par intervalle de rechargement : || $4\n|}",
+    "linktitles-bot-comment": "L'extension LinkTitles a automatiquement ajouté des liens vers des pages existantes ($1).",
+    "right-linktitles-batch": "Effectuer une opération par lot LinkTitles",
+    "action-linktitles-batch": "effectuer une opération par lot LinkTitles",
+    "linktitles-special-batch-all": "Traiter toutes les pages",
+    "linktitles-special-single-page-header": "Traiter une seule page",
+    "linktitles-special-single-page-label": "Nom de la page :",
+    "linktitles-special-single-page-submit": "Traiter la page",
+    "linktitles-special-target-page-header": "Lier une page cible",
+    "linktitles-special-target-page-label": "Page cible :",
+    "linktitles-special-target-page-submit": "Lier la cible",
+    "linktitles-special-page-not-found": "Page \"$1\" introuvable.",
+    "linktitles-special-single-page-success": "Page \"$1\" traitée avec succès.",
+    "linktitles-special-single-page-failure": "Échec du traitement de la page \"$1\"."
+}

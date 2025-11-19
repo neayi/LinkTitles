@@ -9,5 +9,15 @@
 	"linktitles-special-completed-info": "== Batch processing completed! ==\n{| class=\"wikitable\"\n|-\n| total number of pages: || $1\n|-\n| timeout setting [s]: || $2\n|-\n| webpage reloads: || $3\n|-\n| pages scanned per reload interval: || $4\n|}",
 	"linktitles-bot-comment": "The LinkTitles extension automatically added links to existing pages ($1).",
 	"right-linktitles-batch": "Perform a LinkTitles batch operation",
-	"action-linktitles-batch": "perform a LinkTitles batch operation"
+	"action-linktitles-batch": "perform a LinkTitles batch operation",
+	"linktitles-special-batch-all": "Process All Pages",
+	"linktitles-special-single-page-header": "Process Single Page",
+	"linktitles-special-single-page-label": "Page Name:",
+	"linktitles-special-single-page-submit": "Process Page",
+	"linktitles-special-target-page-header": "Link Target Page",
+	"linktitles-special-target-page-label": "Target Page:",
+	"linktitles-special-target-page-submit": "Link Target",
+	"linktitles-special-page-not-found": "Page \"$1\" not found.",
+	"linktitles-special-single-page-success": "Successfully processed page \"$1\".",
+	"linktitles-special-single-page-failure": "Failed to process page \"$1\"."
 }
