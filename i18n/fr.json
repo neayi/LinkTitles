@@ -19,5 +19,8 @@
     "linktitles-special-target-page-submit": "Lier la cible",
     "linktitles-special-page-not-found": "Page \"$1\" introuvable.",
     "linktitles-special-single-page-success": "Page \"$1\" traitée avec succès.",
-    "linktitles-special-single-page-failure": "Échec du traitement de la page \"$1\"."
+    "linktitles-special-single-page-failure": "Échec du traitement de la page \"$1\".",
+    "apihelp-linktitles-summary": "Traite une seule page avec l'extension LinkTitles, en ajoutant automatiquement des liens vers les pages existantes.",
+    "apihelp-linktitles-param-page": "Titre de la page à traiter.",
+    "apihelp-linktitles-example-page": "Traiter la page 'Accueil'."
 }

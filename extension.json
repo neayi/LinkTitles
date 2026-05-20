@@ -48,10 +48,14 @@
                 "LinkTitles\\Splitter": "includes/Splitter.php",
                 "LinkTitles\\Config": "includes/Config.php",
                 "LinkTitles\\Special": "includes/Special.php",
+                "LinkTitles\\ApiLinkTitles": "includes/ApiLinkTitles.php",
                 "LinkTitles\\TestCase": "tests/phpunit/TestCase.php"
         },
         "SpecialPages": {
                 "LinkTitles": "LinkTitles\\Special"
+        },
+        "APIModules": {
+                "linktitles": "LinkTitles\\ApiLinkTitles"
         },
         "AvailableRights": [
                 "linktitles-batch"

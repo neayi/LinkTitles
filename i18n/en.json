@@ -19,5 +19,8 @@
 	"linktitles-special-target-page-submit": "Link Target",
 	"linktitles-special-page-not-found": "Page \"$1\" not found.",
 	"linktitles-special-single-page-success": "Successfully processed page \"$1\".",
-	"linktitles-special-single-page-failure": "Failed to process page \"$1\"."
+	"linktitles-special-single-page-failure": "Failed to process page \"$1\".",
+	"apihelp-linktitles-summary": "Process a single page with the LinkTitles extension, automatically adding links to existing pages.",
+	"apihelp-linktitles-param-page": "Title of the page to process.",
+	"apihelp-linktitles-example-page": "Process the page 'Main Page'."
 }
