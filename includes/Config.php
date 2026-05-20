@@ -143,6 +143,13 @@ class Config {
 	public $skipTemplates;
 
 	/**
+	 * List of template names that should be processed even when $skipTemplates is
+	 * true. Text inside these templates will still be linked.
+	 * @var array $skipTemplatesExcept
+	 */
+	public $skipTemplatesExcept;
+
+	/**
 	 * Whether or not to parse headings.
 	 * @var bool $parseHeadings
 	 */
@@ -216,6 +223,7 @@ class Config {
 		global $wgLinkTitlesWordStartOnly;
 		global $wgLinkTitlesWordEndOnly;
 		global $wgLinkTitlesSkipTemplates;
+		global $wgLinkTitlesSkipTemplatesExcept;
 		global $wgLinkTitlesParseHeadings;
 		global $wgLinkTitlesEnableNoTargetMagicWord;
 		global $wgLinkTitlesCheckRedirect;
@@ -236,6 +244,7 @@ class Config {
 		$this->wordStartOnly = $wgLinkTitlesWordStartOnly;
 		$this->wordEndOnly = $wgLinkTitlesWordEndOnly;
 		$this->skipTemplates = $wgLinkTitlesSkipTemplates;
+		$this->skipTemplatesExcept = $wgLinkTitlesSkipTemplatesExcept ?? [];
 		$this->parseHeadings = $wgLinkTitlesParseHeadings;
 		$this->enableNoTargetMagicWord = $wgLinkTitlesEnableNoTargetMagicWord;;
 		$this->checkRedirect = $wgLinkTitlesCheckRedirect;;

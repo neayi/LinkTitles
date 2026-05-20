@@ -54,8 +54,15 @@ class ApiLinkTitles extends \ApiBase {
 			);
 		}
 
+		$config = new Config();
+		if ( isset( $params['skiptemplatesexcept'] ) && count( $params['skiptemplatesexcept'] ) > 0 ) {
+			$config->skipTemplatesExcept = $params['skiptemplatesexcept'];
+			// Invalidate the Splitter singleton so it is rebuilt with the new config.
+			Splitter::invalidate();
+		}
+
 		$context = \RequestContext::getMain();
-		$success = Extension::processPage( $title, $context );
+		$success = Extension::processPage( $title, $context, false, "", $config );
 
 		$result = $this->getResult();
 		$result->addValue( null, 'linktitles', [
@@ -81,6 +88,11 @@ class ApiLinkTitles extends \ApiBase {
 			'page' => [
 				\ApiBase::PARAM_TYPE     => 'string',
 				\ApiBase::PARAM_REQUIRED => true,
+			],
+			'skiptemplatesexcept' => [
+				\ApiBase::PARAM_TYPE     => 'string',
+				\ApiBase::PARAM_ISMULTI  => true,
+				\ApiBase::PARAM_REQUIRED => false,
 			],
 		];
 	}

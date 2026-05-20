@@ -28,6 +28,7 @@ Minimum requirement: MediaWiki version **1.35**.
    - [Batch processing](#batch-processing)
    - [Special:LinkTitles](#special-linktitles)
    - [Maintenance script](#maintenance-script)
+   - [API](#api)
 4. [Configuration](#configuration)
    - [Linking when a page is edited and saved](#linking-when-a-page-is-edited-and-saved)
    - [Linking when a page is rendered for display](#linking-when-a-page-is-rendered-for-display)
@@ -38,6 +39,7 @@ Minimum requirement: MediaWiki version **1.35**.
    - [Filtering pages by title length](#filtering-pages-by-title-length)
    - [Excluding pages from being linked to](#excluding-pages-from-being-linked-to)
    - [Dealing with templates](#dealing-with-templates)
+   - [Templates exception list](#templates-exception-list)
    - [Multiple links to the same page](#multiple-links-to-the-same-page)
    - [Partial words](#partial-words)
    - [Special page configuration](#special-page-configuration)
@@ -230,6 +232,45 @@ Depending on your shell, you may omit the `php` and call the script directly:
 
     extensions/LinkTitles/linktitles-cli.php
 
+#### API
+
+The extension provides a MediaWiki API module (`action=linktitles`) that allows
+programmatic processing of a single page. This is useful for integrating
+LinkTitles into bots or external scripts.
+
+The API requires a POST request with a valid CSRF token and the
+`linktitles-batch` right (granted to the `sysop` group by default).
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `page` | yes | The name of the page to process. |
+| `skiptemplatesexcept` | no | Pipe-separated list of template names that should be linked inside, even if `$wgLinkTitlesSkipTemplates` is `true`. |
+
+**Example — process a single page:**
+
+    POST api.php
+    action=linktitles&page=Main_Page&token=TOKEN
+
+**Example — process a page and link inside specific templates despite `$wgLinkTitlesSkipTemplates = true`:**
+
+    POST api.php
+    action=linktitles&page=Main_Page&skiptemplatesexcept=Infobox|NoteImportante&token=TOKEN
+
+In this example, the text inside `{{Infobox}}` and `{{NoteImportante}}` will be
+linked even though templates are globally skipped.
+
+You can use the MediaWiki JavaScript API to call it:
+
+```javascript
+new mw.Api().postWithToken( 'csrf', {
+    action: 'linktitles',
+    page: 'Main_Page',
+    skiptemplatesexcept: 'Infobox|NoteImportante'
+} );
+```
+
 ## Configuration
 
 To change the configuration, set the variables in your `LocalSettings.php` file.
@@ -410,6 +451,20 @@ symbol (`|`) will be parsed.
 Note: This setting works only with parse-on-edit; it does not affect
 parse-on-render! This is because the templates have already been transcluded
 (expanded) when the links are added during rendering.
+
+### Templates exception list
+
+    $wgLinkTitlesSkipTemplatesExcept = [];
+
+When `$wgLinkTitlesSkipTemplates` is `true`, you can still allow specific
+templates to be processed by listing them here. Text inside those templates will
+be linked as normal, while all other templates remain skipped.
+
+This setting can also be overridden per API call via the `skiptemplatesexcept`
+parameter (see the [API section](#api)). The API parameter takes precedence over
+this global setting for that specific request.
+
+    $wgLinkTitlesSkipTemplatesExcept = [ 'Infobox', 'NoteImportante' ];
 
 ### Multiple links to the same page
 

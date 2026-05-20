@@ -24,6 +24,7 @@
                 "LinkTitlesParseOnRender": false,
                 "LinkTitlesParseHeadings": false,
                 "LinkTitlesSkipTemplates": true,
+                "LinkTitlesSkipTemplatesExcept": [],
                 "LinkTitlesPreferShortTitles": true,
                 "LinkTitlesCheckRedirect": true,
                 "LinkTitlesEnableNoTargetMagicWord": false,

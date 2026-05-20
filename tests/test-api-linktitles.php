@@ -166,6 +166,7 @@ echo "==> Traitement de la page '$page' via l'API linktitles...\n";
 $data = apiRequest( $apiUrl, [
 	'action' => 'linktitles',
 	'page'   => $page,
+	'skiptemplatesexcept' => 'Résumé long',
 	'token'  => $csrfToken,
 ], true, $ch );
 

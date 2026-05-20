@@ -108,8 +108,10 @@ class Extension {
 	 * @param  string $targetPageTitle When not empty, will be the only replaced linked in the source page
 	 * @return bool True if the page exists, false if the page does not exist
 	 */
-	public static function processPage( \Title $title, \RequestContext $context, $dryRun = false, $targetPageTitle = "" ) {
-		$config = new Config();
+	public static function processPage( \Title $title, \RequestContext $context, $dryRun = false, $targetPageTitle = "", Config $config = null ) {
+		if ( $config === null ) {
+			$config = new Config();
+		}
 		$source = Source::createFromTitle( $title, $config );
 		if ( $source->hasContent() ) {
 			$linker = new Linker( $config );

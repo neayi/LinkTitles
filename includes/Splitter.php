@@ -101,7 +101,18 @@ class Splitter {
 		{
 			// Use recursive regex to balance curly braces;
 			// see http://www.regular-expressions.info/recurse.html
-			$templatesDelimiter = '{{(?>[^{}]|(?R))*}}|';
+			if ( !empty( $this->config->skipTemplatesExcept ) ) {
+				// Build a negative lookahead so that templates listed in
+				// skipTemplatesExcept are NOT excluded from linking.
+				$quoted = array_map(
+					static function( $name ) { return preg_quote( trim( $name ), '/' ); },
+					$this->config->skipTemplatesExcept
+				);
+				$exceptionsPattern = implode( '|', $quoted );
+				$templatesDelimiter = '{{(?!(?:' . $exceptionsPattern . ')\s*[|}])(?>[^{}]|(?R))*}}|';
+			} else {
+				$templatesDelimiter = '{{(?>[^{}]|(?R))*}}|';
+			}
 		} else {
 			// Match template names (ignoring any piped [[]] links in them)
 			// along with the trailing pipe and parameter name or closing
