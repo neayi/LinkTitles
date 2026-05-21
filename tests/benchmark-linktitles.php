@@ -225,6 +225,7 @@ function benchmarkLinkTitles( $apiUrl, $page, $csrfToken, $ch ) {
 	$data = apiRequest( $apiUrl, [
 		'action' => 'linktitles',
 		'page'   => $page,
+		'skiptemplatesexcept' => 'Résumé long',
 		'token'  => $csrfToken,
 	], true, $ch );
 

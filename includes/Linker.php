@@ -187,11 +187,6 @@ class Linker {
 					}
 				}
 			} // $wgLinkTitlesSmartMode
-			
-			// If we've reached the limit (firstOnly), we can stop early
-			if ( $limitReached ) {
-				break;
-			}
 		}; // foreach $res as $row
 
 		if ( $newLinks ) {
