@@ -56,6 +56,9 @@ class ApiLinkTitles extends \ApiBase {
 
 		$config = new Config();
 		if ( isset( $params['skiptemplatesexcept'] ) && count( $params['skiptemplatesexcept'] ) > 0 ) {
+			// When skipTemplatesExcept is provided, we must enable skipTemplates
+			// so that the Splitter uses the correct pattern with exceptions
+			$config->skipTemplates = true;
 			$config->skipTemplatesExcept = $params['skiptemplatesexcept'];
 			// Invalidate the Splitter singleton so it is rebuilt with the new config.
 			Splitter::invalidate();

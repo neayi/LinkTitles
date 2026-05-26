@@ -41,6 +41,12 @@ class Splitter {
 	 */
 	public $config;
 
+	/**
+	 * Storage for protected templates during split operation.
+	 * @var array $protectedTemplates
+	 */
+	private $protectedTemplates = [];
+
 	private static $instance;
 
 	/**
@@ -88,7 +94,29 @@ class Splitter {
 		ini_set( 'pcre.jit', false );
 		ini_set( 'pcre.recursion_limit', "500000" );
 		
-		return preg_split( $this->splitter, $text, -1, PREG_SPLIT_DELIM_CAPTURE );
+		// Pre-process text if skipTemplatesExcept is configured
+		// to avoid PREG_RECURSION_LIMIT_ERROR with large templates
+		$useProtection = $this->config->skipTemplates && !empty( $this->config->skipTemplatesExcept );
+		if ( $useProtection ) {
+			$text = $this->protectExceptedTemplates( $text );
+		}
+		
+		$result = preg_split( $this->splitter, $text, -1, PREG_SPLIT_DELIM_CAPTURE );
+		
+		// Restore protected templates in both the result array and the original text
+		if ( $useProtection ) {
+			// Restore the original text (passed by reference)
+			$text = $this->restoreExceptedTemplates( $text );
+			
+			// Also restore in the split result parts
+			if ( $result !== false ) {
+				foreach ( $result as &$part ) {
+					$part = $this->restoreExceptedTemplates( $part );
+				}
+			}
+		}
+		
+		return $result;
 	}
 
 	/*
@@ -99,18 +127,15 @@ class Splitter {
 	private function buildSplitter() {
 		if ( $this->config->skipTemplates )
 		{
-			// Use recursive regex to balance curly braces;
-			// see http://www.regular-expressions.info/recurse.html
+			// When skipTemplatesExcept is used, we use a simple non-recursive pattern
+			// and handle exceptions via pre/post-processing to avoid PREG_RECURSION_LIMIT_ERROR
 			if ( !empty( $this->config->skipTemplatesExcept ) ) {
-				// Build a negative lookahead so that templates listed in
-				// skipTemplatesExcept are NOT excluded from linking.
-				$quoted = array_map(
-					static function( $name ) { return preg_quote( trim( $name ), '/' ); },
-					$this->config->skipTemplatesExcept
-				);
-				$exceptionsPattern = implode( '|', $quoted );
-				$templatesDelimiter = '{{(?!(?:' . $exceptionsPattern . ')\s*[|}])(?>[^{}]|(?R))*}}|';
+				// Simple pattern that matches templates without recursion
+				// The exceptions are handled in protectExceptedTemplates()
+				$templatesDelimiter = '{{[^}]*}}|';
 			} else {
+				// Use recursive regex to balance curly braces;
+				// see http://www.regular-expressions.info/recurse.html
 				$templatesDelimiter = '{{(?>[^{}]|(?R))*}}|';
 			}
 		} else {
@@ -161,5 +186,98 @@ class Splitter {
 			'\[' . $urlPattern . '\s.+?\]|'. $urlPattern .  '(?=\s|$)|' . // urls
 			'(?<=\b)\S+\@(?:\S+\.)+\S+(?=\b)' .        // email addresses
 			')/ismS';
+	}
+
+	/**
+	 * Protects templates listed in skipTemplatesExcept by replacing them with placeholders.
+	 * This avoids PREG_RECURSION_LIMIT_ERROR with large templates.
+	 *
+	 * @param string $text The text to process.
+	 * @return string Text with protected templates replaced by placeholders.
+	 */
+	private function protectExceptedTemplates( $text ) {
+		$this->protectedTemplates = [];
+		$placeholderIndex = 0;
+		
+		// Build pattern to match excepted templates
+		$quoted = array_map(
+			static function( $name ) { return preg_quote( trim( $name ), '/' ); },
+			$this->config->skipTemplatesExcept
+		);
+		$exceptionsPattern = implode( '|', $quoted );
+		
+		// Match templates with balanced braces using a callback
+		// Pattern: {{ optional_whitespace excepted_template_name ...
+		$pattern = '/{{(\s*(?:' . $exceptionsPattern . ')\s*[|}])/i';
+		
+		$offset = 0;
+		while ( preg_match( $pattern, $text, $matches, PREG_OFFSET_CAPTURE, $offset ) ) {
+			$startPos = $matches[0][1];
+			$afterName = $matches[1][0];
+			
+			// Find the matching closing braces
+			$endPos = $this->findMatchingCloseBrace( $text, $startPos );
+			if ( $endPos === false ) {
+				// No matching close brace found, skip this match
+				$offset = $startPos + 2;
+				continue;
+			}
+			
+			// Extract the full template
+			$templateText = substr( $text, $startPos, $endPos - $startPos + 2 );
+			
+			// Create placeholder
+			$placeholder = "\x00LINKTITLES_PROTECTED_" . $placeholderIndex . "\x00";
+			$this->protectedTemplates[$placeholder] = $templateText;
+			$placeholderIndex++;
+			
+			// Replace template with placeholder
+			$text = substr_replace( $text, $placeholder, $startPos, $endPos - $startPos + 2 );
+			
+			// Update offset (search after the placeholder)
+			$offset = $startPos + strlen( $placeholder );
+		}
+		
+		return $text;
+	}
+
+	/**
+	 * Finds the position of the matching closing }} for a template starting at $startPos.
+	 *
+	 * @param string $text The text to search in.
+	 * @param int $startPos The position of the opening {{.
+	 * @return int|false The position of the second closing brace, or false if not found.
+	 */
+	private function findMatchingCloseBrace( $text, $startPos ) {
+		$len = strlen( $text );
+		$depth = 0;
+		$i = $startPos;
+		
+		while ( $i < $len - 1 ) {
+			if ( $text[$i] === '{' && $text[$i + 1] === '{' ) {
+				$depth++;
+				$i += 2;
+			} elseif ( $text[$i] === '}' && $text[$i + 1] === '}' ) {
+				$depth--;
+				if ( $depth === 0 ) {
+					return $i + 1; // Position of the second }
+				}
+				$i += 2;
+			} else {
+				$i++;
+			}
+		}
+		
+		return false; // No matching close brace found
+	}
+
+	/**
+	 * Restores protected templates by replacing placeholders with original content.
+	 *
+	 * @param string $text The text to process.
+	 * @return string Text with placeholders restored to original templates.
+	 */
+	private function restoreExceptedTemplates( $text ) {
+		return str_replace( array_keys( $this->protectedTemplates ), array_values( $this->protectedTemplates ), $text );
 	}
 }

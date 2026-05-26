@@ -161,7 +161,7 @@ class Target {
 	 * @return String regular expression pattern
 	 */
 	private function buildRegex( $searchTerm ) {
-		return '/(?<![\:\.\@\/\?\&])' . $this->wordStart . $searchTerm . $this->wordEnd . '/Su';
+		return '/(?<![\:\.\@\/\?\&\[\|])' . $this->wordStart . $searchTerm . $this->wordEnd . '/Su';
 	}
 
 	/**
